@@ -62,7 +62,7 @@ def get_serialized_test(model):
 # runs the torch-mlir linalg on tensors backend and finally runs via iree stack.
 def shark_inference(module, input, device="cpu", dynamic=False, jit_trace=False):
 
-    if trace_module:
+    if jit_trace:
         module = getTracedRecursiveScriptModule(module, input, dynamic)
         module = get_serialized_test(module)
     else:
@@ -103,4 +103,6 @@ def shark_inference(module, input, device="cpu", dynamic=False, jit_trace=False)
     ctx.add_vm_module(vm_module)
     ModuleCompiled = ctx.modules.module["forward"]
     result = ModuleCompiled(input.numpy())
-    return np.asarray(result, dtype=np.float32)
+    result_numpy = np.asarray(result, dtype=np.float32)
+    result_copy = np.copy(result_numpy)
+    return result_copy
